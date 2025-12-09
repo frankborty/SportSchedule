@@ -8,24 +8,24 @@
 
         public WebSiteSportScraper() { }
 
-        public async Task<List<SportEvent>> LoadSportEventFromWeb()
+        public async Task<List<SportEvent>> LoadSportEventFromWebAsync(string rootURL, DateTime date, List<string> regexPatternList)
         {
-            string todayURL = GetWebSiteSportScheduleURL();
-            List<string> sportEventStringList = await ExtractSportEventFromHTMLAsync(todayURL);
+            string webSiteURL = GetWebSiteSportScheduleURL(rootURL, date);
+            List<string> sportEventStringList = await ExtractSportEventFromHTMLAsync(webSiteURL);
             List<SportEvent> result = new List<SportEvent>();
             foreach(var sportEventString in sportEventStringList)
             {
-                result.Add(SportEvent.SportEventFromString(sportEventString));
+                result.Add(TmpUtils.SportEventFromString(sportEventString, regexPatternList, date));
             }
             return result;
         }
 
-        public string GetWebSiteSportScheduleURL(DateTime? date = null)
+        public string GetWebSiteSportScheduleURL(string rootUrl, DateTime? date = null)
         {
             var today = date ?? DateTime.Today;
             string currentYearMonth = $"{today:yyyy/MM}";
             string weekDayMonth = today.ToString("dddd-d-MMMM", culturaItaliana).Replace("ì", "i");
-            return $"https://www.xyz.it/{currentYearMonth}/sport-in-tv-oggi-{weekDayMonth}-orari-e-programma-completo-come-vedere-gli-eventi-in-streaming/";
+            return $"https://{rootUrl}/{currentYearMonth}/sport-in-tv-oggi-{weekDayMonth}-orari-e-programma-completo-come-vedere-gli-eventi-in-streaming/";
         }
 
         public async Task<List<string>> ExtractSportEventFromHTMLAsync(string url)

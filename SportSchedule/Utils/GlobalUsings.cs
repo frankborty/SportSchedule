@@ -1,4 +1,11 @@
-﻿global using SportSchedule.Models;
+﻿global using HtmlAgilityPack;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.EntityFrameworkCore;
+global using SportSchedule.Data;
+global using SportSchedule.Models;
+global using SportSchedule.Services;
+global using SportSchedule.Services.Scraping;
+global using SportSchedule.Utils;
 global using System.Globalization;
-global using HtmlAgilityPack;
+global using System.Net;
 global using System.Text.RegularExpressions;

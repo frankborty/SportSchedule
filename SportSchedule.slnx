@@ -1,4 +1,6 @@
 <Solution>
+  <Folder Name="/Test/">
+    <Project Path="Test/TestSportSchedule/TestSportSchedule.csproj" />
+  </Folder>
   <Project Path="SportSchedule/SportSchedule.csproj" Id="0abcdf37-b5a8-4427-a79b-250786d35f19" />
-  <Project Path="TestSportSchedule/TestSportSchedule.csproj" Id="53c8984e-0ba7-452a-8d28-c3e2b6c101d0" />
 </Solution>
