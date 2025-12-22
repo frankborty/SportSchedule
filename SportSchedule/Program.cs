@@ -7,21 +7,20 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<ICsvProcessorService, NBAScheduleCSVProcessorService>();
 builder.Services.AddDbContext<SportScheduleDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("SportScheduleDbContext")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("SportScheduleDb")));
+
+builder.Services.AddCors(options =>
+{
+    CorsConfigurator.ConfigureCors(builder.Configuration, options);
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
 app.MapOpenApi();
 app.MapScalarApiReference();
-//}
 
-//app.UseHttpsRedirection();
-
+app.UseCors("FrontendOnly");
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

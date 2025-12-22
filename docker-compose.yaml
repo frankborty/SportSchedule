@@ -1,0 +1,15 @@
+services:
+  sport-schedule_be:
+    build:
+      context: .
+      dockerfile: SportSchedule/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+     - ConnectionStrings__SportScheduleDb=Host=
+     - SportEventRegexPatterns__0=
+     - SportEventRegexPatterns__1=
+     - SportEventRegexPatterns__2=
+     - SportEventRegexPatterns__3=
+     - WebSiteRootUrl=
+     - Cors:AllowedOrigins=
