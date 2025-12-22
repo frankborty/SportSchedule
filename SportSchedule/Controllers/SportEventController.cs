@@ -62,9 +62,14 @@
             // Leggi eventuali impostazioni da appsettings.json
             try
             {
-                var sportEventList = await _context.SportEvents
-                    .Where(e => e.Time.Date == targetDate)
-                    .ToListAsync();
+                var sportEventListQuery = _context.SportEvents.AsNoTracking();
+                var result = sportEventListQuery.ToList();
+                if (date is not null)
+                {
+                    sportEventListQuery = sportEventListQuery.Where(e => e.Time.Date == targetDate.Date);
+                }
+
+                var sportEventList = await sportEventListQuery.ToListAsync();
 
                 if (!sportEventList.Any())
                 {
@@ -76,6 +81,145 @@
             catch (Exception ex)
             {
                 return StatusCode(500, $"Errore durante il caricamento eventi: {ex.Message} [{ex.InnerException?.Message}]");
+            }
+        }
+
+        // POST: api/SportEvent/AddEvent
+        [HttpPost("AddEvent")]
+        public async Task<IActionResult> AddEvent([FromBody] SportEvent sportEvent)
+        {
+            try
+            {
+                sportEvent.Id = 0;
+                if (sportEvent == null)
+                {
+                    return BadRequest("L'evento sportivo non può essere nullo");
+                }
+
+                // Validazione base
+                if (string.IsNullOrWhiteSpace(sportEvent.Competition) ||
+                    string.IsNullOrWhiteSpace(sportEvent.Event))
+                {
+                    return BadRequest("Competition ed Event sono campi obbligatori");
+                }
+
+                // Controlla se l'evento esiste già nel database
+                bool exists = await _context.SportEvents.AnyAsync(e =>
+                    e.Competition == sportEvent.Competition &&
+                    e.Event == sportEvent.Event &&
+                    e.Time == sportEvent.Time &&
+                    e.Channel == sportEvent.Channel);
+
+                if (exists)
+                {
+                    return Conflict("L'evento esiste già nel database");
+                }
+
+                // Assicurati che la data sia UTC
+                if (sportEvent.Time.Kind != DateTimeKind.Utc)
+                {
+                    sportEvent.Time = DateTime.SpecifyKind(sportEvent.Time, DateTimeKind.Utc);
+                }
+
+                _context.SportEvents.Add(sportEvent);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetEvents),
+                    new { date = sportEvent.Time.Date },
+                    new
+                    {
+                        Message = "Evento aggiunto con successo",
+                        Event = new
+                        {
+                            sportEvent.Id,
+                            sportEvent.Competition,
+                            sportEvent.Sport,
+                            sportEvent.Event,
+                            sportEvent.Time,
+                            sportEvent.Channel
+                        }
+                    });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Errore durante l'aggiunta dell'evento: {ex.Message} [{ex.InnerException?.Message}]");
+            }
+        }
+
+        [HttpPost("AddEvents")]
+        public async Task<IActionResult> AddEvents([FromBody] List<SportEvent> sportEvents)
+        {
+            try
+            {
+                if (sportEvents == null || !sportEvents.Any())
+                {
+                    return BadRequest("La lista degli eventi non può essere vuota");
+                }
+
+                var addedEvents = new List<SportEvent>();
+                var skippedEvents = new List<string>();
+                var invalidEvents = new List<string>();
+
+                foreach (var sportEvent in sportEvents)
+                {
+                    sportEvent.Id = 0;
+
+                    // Validazione base
+                    if (string.IsNullOrWhiteSpace(sportEvent.Competition) ||
+                        string.IsNullOrWhiteSpace(sportEvent.Event))
+                    {
+                        invalidEvents.Add($"{sportEvent.Event ?? "N/A"} - {sportEvent.Competition ?? "N/A"}");
+                        continue;
+                    }
+
+                    // Controlla se l'evento esiste già nel database
+                    bool exists = await _context.SportEvents.AnyAsync(e =>
+                        e.Competition == sportEvent.Competition &&
+                        e.Event == sportEvent.Event &&
+                        e.Time == sportEvent.Time &&
+                        e.Channel == sportEvent.Channel);
+
+                    if (exists)
+                    {
+                        skippedEvents.Add($"{sportEvent.Event} - {sportEvent.Competition} - {sportEvent.Time:yyyy-MM-dd HH:mm}");
+                        continue;
+                    }
+
+                    // Assicurati che la data sia UTC
+                    if (sportEvent.Time.Kind != DateTimeKind.Utc)
+                    {
+                        sportEvent.Time = DateTime.SpecifyKind(sportEvent.Time, DateTimeKind.Utc);
+                    }
+
+                    _context.SportEvents.Add(sportEvent);
+                    addedEvents.Add(sportEvent);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    Message = "Operazione completata",
+                    TotalReceived = sportEvents.Count,
+                    Added = addedEvents.Count,
+                    Skipped = skippedEvents.Count,
+                    Invalid = invalidEvents.Count,
+                    AddedEvents = addedEvents.Select(e => new
+                    {
+                        e.Id,
+                        e.Competition,
+                        e.Sport,
+                        e.Event,
+                        e.Time,
+                        e.Channel
+                    }),
+                    SkippedEvents = skippedEvents,
+                    InvalidEvents = invalidEvents
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Errore durante l'aggiunta degli eventi: {ex.Message} [{ex.InnerException?.Message}]");
             }
         }
     }

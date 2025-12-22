@@ -9,3 +9,5 @@ global using SportSchedule.Utils;
 global using System.Globalization;
 global using System.Net;
 global using System.Text.RegularExpressions;
+global using System.Text;
+global using Scalar.AspNetCore;

@@ -1,4 +1,4 @@
-﻿namespace SportSchedule.Services
+﻿namespace SportSchedule.Utils
 {
     public static class StringUtils
     {
