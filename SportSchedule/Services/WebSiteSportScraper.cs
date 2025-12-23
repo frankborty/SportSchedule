@@ -113,14 +113,14 @@
         private static string CleanChannelString(string dirtyChannelString)
         {
             dirtyChannelString = dirtyChannelString.Trim();
-            string cleanChannelString = dirtyChannelString.Replace("Diretta TV", "", StringComparison.InvariantCultureIgnoreCase)
-                .Replace("Diretta streaming", "", StringComparison.InvariantCultureIgnoreCase)
+            string cleanChannelString = dirtyChannelString.Replace("Diretta TV", " ", StringComparison.InvariantCultureIgnoreCase)
+                .Replace("Diretta streaming", " ", StringComparison.InvariantCultureIgnoreCase)
                 .Replace("live streaming", " ", StringComparison.InvariantCultureIgnoreCase)
                 .Replace(" e ", " ", StringComparison.InvariantCultureIgnoreCase)
-                .Replace(" sito", "", StringComparison.InvariantCultureIgnoreCase)
-                .Replace(" app", "", StringComparison.InvariantCultureIgnoreCase)
-                .Replace(" su", "", StringComparison.InvariantCultureIgnoreCase)
-                .Replace(" di", "", StringComparison.InvariantCultureIgnoreCase)
+                .Replace(" sito ", " ", StringComparison.InvariantCultureIgnoreCase)
+                .Replace(" app ", " ", StringComparison.InvariantCultureIgnoreCase)
+                .Replace(" su ", " ", StringComparison.InvariantCultureIgnoreCase)
+                .Replace(" di ", " ", StringComparison.InvariantCultureIgnoreCase)
                 .Replace(".", "", StringComparison.InvariantCultureIgnoreCase)
                 .Replace(";", "", StringComparison.InvariantCultureIgnoreCase);
 
